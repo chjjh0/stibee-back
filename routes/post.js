@@ -7,7 +7,10 @@ const path = require('path');
 const { Post } = require('../models/Post');
 
 
+
+
 router.get('/list', (req, res) => {
+  console.log('post/list');
   // console.log('lists', path.join(path.resolve(), `/upload/${img}`));
 
   // console.log('lists', path.join(__dirname, '2020-01-20_제목777_025c9.png'));
@@ -19,7 +22,7 @@ router.get('/list', (req, res) => {
   
   const encodeBase64Img = (img) => {
     const imgPath = path.join(path.resolve(), `/upload/${img}`)
-    console.log('base64 변환 중', path.join(__dirname, `${img}`));
+    // console.log('base64 변환 중', path.join(__dirname, `${img}`));
     return new Promise((resolve, reject) => {
       const data = fs.readFileSync(imgPath, { encoding: 'base64' })
       // convert the file to base64 text
@@ -35,16 +38,61 @@ router.get('/list', (req, res) => {
       posts.map((post, idx) => {
         encodeBase64Img(post.screenshot)
           .then((data) => {
-            console.log('idx ', idx);
+            // console.log('idx ', idx);
             posts[idx].screenshot = data;
-            console.log('적용 후');
+            // console.log('적용 후');
+          })
+          .catch(err => {
+            console.log('encodeBase64 err', err);
           })
       })
     )
 
-    console.log('반환', posts)
+    // console.log('반환', posts)
     return res.status(200).json({ success: true, posts })
   })
+})
+
+router.post('/postOrigin/:postId', (req, res) => {
+  console.log('postOrigin', req.params.postId);
+  Post.findOne({ "_id": req.params.postId })
+      .populate('writer')
+      .exec((err, post) => {
+          if (err) return res.status(400).send(err);
+          return res.status(200).json({ success: true, post });
+      })
+})
+
+router.put('/update/:postId', (req, res) => {
+  // console.log('postUpdate', req.params.postId);
+  // console.log('postUpdate', req.body);
+
+  Post.findByIdAndUpdate(
+    req.params.postId, 
+    req.body, 
+    {new: true}, 
+    (err, post) => {
+      if (err) return res.status(400).send(err);
+      return res.status(200).json({ success: true, post });
+  })
+})
+
+router.delete('/delete/:postId', (req, res) => {
+  console.log('postDelete', req.params.postId);
+
+  Post.findByIdAndRemove(req.params.postId, (err, res) => {
+    if (err) return res.status(400).send(err);
+    console.log('delete res', res);
+    return res.status(200).json({ success: true });
+  })
+  // Post.findByIdAndUpdate(
+  //   req.params.postId, 
+  //   req.body, 
+  //   {new: true}, 
+  //   (err, post) => {
+  //     if (err) return res.status(400).send(err);
+  //     return res.status(200).json({ success: true, post });
+  // })
 })
 
 router.post('/save', (req, res) => {
@@ -68,11 +116,11 @@ router.post('/save', (req, res) => {
       ...req.body
     });
 
-    console.log('submitProc ', req.body);
-    // post.save((err, post) => {
-    //   if (err) return res.json({ success: false, err })
-    //   return res.status(200).json({ success: true })
-    // })
+    // console.log('submitProc ', req.body);
+    post.save((err, post) => {
+      if (err) return res.json({ success: false, err })
+      return res.status(200).json({ success: true })
+    })
   }
 
   // 스크린샷 저장
@@ -90,46 +138,7 @@ router.post('/save', (req, res) => {
     console.log('파일 업로드 오류', e);
     res.json({ success: false, e })
   }
-    
+})
 
-    
-      
-
-    // const check = emailContent => {
-    //     return new Promise((resolve, reject) => {
-    //         console.log('함수 테스트', emailContent);
-    //         resolve(emailContent)
-    //     })
-    // }
-
-    // check(emailContent).then(check).then(res => {
-    //     console.log('최종', res);
-    // })
-
-    // let transporter = nodemailer.createTransport({
-    //     service: 'gmail',
-    //     auth: {
-    //       user: 'chjjh0@gmail.com',  // gmail 계정 아이디를 입력
-    //       pass: 'godthanks2'          // gmail 계정의 비밀번호를 입력
-    //     }
-    //   });
-
-    // let mailOptions = {
-    //     from: 'chjjh0@gmail.com',    // 발송 메일 주소 (위에서 작성한 gmail 계정 아이디)
-    //     to: 'chjjh@naver.com' ,          // 수신 메일 주소
-    //     subject: 'nodemailer',   // 제목
-    //     html: emailContent  
-    // };
-
-    // transporter.sendMail(mailOptions, function(error, info){
-    // if (error) {
-    //     console.log(error);
-    // }
-    // else {
-    //     console.log('Email sent: ' + info.response);
-    //     res.status(200).json({ success: true })
-    // }
-    // });
-  })
 
 module.exports = router;

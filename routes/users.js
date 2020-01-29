@@ -11,8 +11,8 @@ const { auth } = require("../middleware/auth");
 //=================================
 
 router.get("/auth", auth, (req, res) => {
-    console.log('auth success', req.decode);
-    console.log('auth err', req.err );
+    // console.log('auth success', req.decode);
+    // console.log('auth err', req.err );
     if (req.err) {
         console.log('err 보내기 전', typeof req.err);
         res.status(400).json({ err: req.err })

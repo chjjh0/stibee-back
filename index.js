@@ -26,8 +26,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-app.use('/api/post', require('./routes/post'));
 app.use('/api/user', require('./routes/users'));
+app.use('/api/post', require('./routes/post'));
+app.use('/api/mail', require('./routes/mail'));
 
 app.use('/', function(req, res) {
     console.log('main req success');
