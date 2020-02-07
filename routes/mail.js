@@ -11,7 +11,7 @@ router.post('/sendMail', (req, res) => {
 
   const { title, emailCont, mailList } = req.body;
 
-  console.log('sendMail', req.body);
+  // console.log('sendMail', req.body);
 
 
   // nodemailer setting
@@ -32,10 +32,10 @@ router.post('/sendMail', (req, res) => {
 
     transporter.sendMail(mailOptions, function(error, info){
       if (error) {
-          console.log('sendMail error', error);
+          // console.log('sendMail error', error);
       }
       else {
-          console.log('sendMail success: ' + info.response);
+          // console.log('sendMail success: ' + info.response);
           res.status(200).json({ success: true })
       }
     });

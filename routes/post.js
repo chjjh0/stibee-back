@@ -9,41 +9,36 @@ const { Post } = require('../models/Post');
 
 
 
-router.get('/list', (req, res) => {
-  console.log('post/list');
-  // console.log('lists', path.join(path.resolve(), `/upload/${img}`));
+router.get('/list/:currentPage', (req, res) => {
+  const { currentPage } = req.params;
+  console.log('post/list', req.params);
 
-  // console.log('lists', path.join(__dirname, '2020-01-20_제목777_025c9.png'));
-  // fs.readFile(path.join(__dirname, '2020-01-20_제목777_025c9.png'), { encoding: 'base64' }, (err, data) => {
-  //   if (err) console.log('err', err);
-  //   console.log('data: ', data);
-
-  // })
-  
+  // const currentPage = req.body.
   const encodeBase64Img = (img) => {
     const imgPath = path.join(path.resolve(), `/upload/${img}`)
     // console.log('base64 변환 중', path.join(__dirname, `${img}`));
     return new Promise((resolve, reject) => {
       const data = fs.readFileSync(imgPath, { encoding: 'base64' })
+
       // convert the file to base64 text
       resolve(data)
     })
   }
 
-  Post.find().exec(async (err, posts) => {
+  Post.find().skip((currentPage-1)*4).limit(4).exec(async (err, posts) => {
     if (err) return res.json({ success: false, err })
-    // console.log('posts: ', posts);
+    if (posts.length === 0) return res.json({ success: false, msg: 'endPage' })
 
     await Promise.race(
       posts.map((post, idx) => {
+        // console.log('post', post.screenshot);
+        // upload폴더에 있는 스크린샷 파일을 base64 형태로 변환해서 보내줌
         encodeBase64Img(post.screenshot)
           .then((data) => {
-            // console.log('idx ', idx);
-            posts[idx].screenshot = data;
-            // console.log('적용 후');
+            posts[idx].screenshot = `data:image/png;base64,${data}`;
           })
           .catch(err => {
-            console.log('encodeBase64 err', err);
+            // 예외처리 필요
           })
       })
     )
@@ -59,6 +54,17 @@ router.post('/postOrigin/:postId', (req, res) => {
       .populate('writer')
       .exec((err, post) => {
           if (err) return res.status(400).send(err);
+          return res.status(200).json({ success: true, post });
+      })
+})
+
+router.post('/findByTag', (req, res) => {
+  console.log('findByTag', req.body.tagName);
+  Post.find({ "tags": req.body.tagName })
+      .populate('writer')
+      .exec((err, post) => {
+          if (err) return res.status(400).send(err);
+          console.log('res', post);
           return res.status(200).json({ success: true, post });
       })
 })
@@ -96,12 +102,11 @@ router.delete('/delete/:postId', (req, res) => {
 })
 
 router.post('/save', (req, res) => {
-  console.log('post save', req.cookies.userId);
   // screenshot img 파일명
   const randomStr = Math.random().toString(16).substr(2, 5);
   const date = moment().format('YYYY-MM-DD');
-  const pngExt = '.png';
-  const imgName = `${date}_${req.body.title}_${randomStr}${pngExt}`
+  const ext = '.png';
+  const imgName = `${date}_${req.body.title}_${randomStr}${ext}`
   const saveImgPath = `${path.resolve()}/upload/${imgName}`
 
 
@@ -109,11 +114,12 @@ router.post('/save', (req, res) => {
   const base64Img = req.body.screenshot.split(',')[1]
 
   const submitProc = (screenshot) => {
+    console.log('screenshot', screenshot);
 
     const post = new Post({
       writer: req.cookies.userId,
-      screenshot,
-      ...req.body
+      ...req.body,
+      screenshot
     });
 
     // console.log('submitProc ', req.body);
@@ -129,8 +135,9 @@ router.post('/save', (req, res) => {
       saveImgPath, 
       base64Img, 
       { encoding: 'base64' }, 
-      (err) => {
+      (res, err) => {
         if (err) throw err;
+        console.log('파일 쓰기 끝', imgName);
         submitProc(imgName)
       }
     )

@@ -5,6 +5,7 @@ const cors = require('cors');
 const router = express.Router();
 
 
+
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 
@@ -31,7 +32,7 @@ app.use('/api/post', require('./routes/post'));
 app.use('/api/mail', require('./routes/mail'));
 
 app.use('/', function(req, res) {
-    console.log('main req success');
+    // console.log('main req success', req);
     res.send('success')
 })
 
@@ -57,5 +58,5 @@ app.use('/', function(req, res) {
 const port = process.env.PORT || 5000
 
 app.listen(port, () => {
-  console.log(`Server Running at ${port}`)
+  // console.log(`Server Running at ${port}`)
 });

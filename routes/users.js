@@ -14,14 +14,15 @@ router.get("/auth", auth, (req, res) => {
     // console.log('auth success', req.decode);
     // console.log('auth err', req.err );
     if (req.err) {
-        console.log('err 보내기 전', typeof req.err);
+        // res.clearCookie('userId');
+        // res.clearCookie('w_auth');
         res.status(400).json({ err: req.err })
     } else {
         res.status(200).json({
-            token: req.decode
+            token: req.decode,
+            success: true
         });
     }
-    
 });
 
 // router.post("/register", (req, res) => {
@@ -63,7 +64,7 @@ router.post("/login", (req, res) => {
                 // console.log('token 발급 전', user);
                 res.cookie('userId', user._id)
                 res.cookie("w_auth", token, {
-                    httpOnly: true
+                    httpOnly: false
                     })
                     .status(200)
                     .json({
