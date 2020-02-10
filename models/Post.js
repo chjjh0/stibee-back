@@ -1,5 +1,8 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+const fs = require('fs');
+const path = require('path');
+
 
 const postSchema = mongoose.Schema({
     writer: {
@@ -27,6 +30,17 @@ const postSchema = mongoose.Schema({
         type: Array
     }
 }, { timestamps: true })
+
+postSchema.methods.encodeBase64Img = function(img, cb) {
+	try {
+		const imgPath = path.join(path.resolve(), `/upload/${img}`)
+		// console.log('base64 변환 중', path.join(__dirname, `${img}`));
+		const data = fs.readFileSync(imgPath, { encoding: 'base64' })
+		cb(data);
+	} catch {
+		throw new Error('Post encodeBase64Img err')
+	}
+}
 
 const Post = mongoose.model('Post', postSchema);
 

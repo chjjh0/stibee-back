@@ -27,7 +27,7 @@ router.post('/sendMail', (req, res) => {
     from: 'chjjh0@gmail.com',    // 발송 메일 주소 (위에서 작성한 gmail 계정 아이디)
     to: mailList,          // 수신 메일 주소
     subject: title,   // 제목
-    html: emailCont
+    html: emailCont 
   };
 
     transporter.sendMail(mailOptions, function(error, info){
