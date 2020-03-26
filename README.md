@@ -13,6 +13,6 @@
 
 # Stack
 
-- Front: HTML, CSS, Reat, Redux, Redux-saga
+- Front: HTML, CSS, React, Redux, Redux-saga
 - Back: Express, MongoDB
 - Infra: AWS
